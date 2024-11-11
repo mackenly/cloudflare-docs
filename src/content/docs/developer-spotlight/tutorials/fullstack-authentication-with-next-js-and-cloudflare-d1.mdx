@@ -25,7 +25,7 @@ import {
 
 In this tutorial, you will build a [Next.js app](/workers/frameworks/framework-guides/nextjs/) with authentication powered by Auth.js, Resend, and [Cloudflare D1](/d1/).
 
-Before continuing, make sure you have a Cloudflare account and have installed and authenticated Wrangler. Some experience with HTML, CSS, and JavaScript/Typescript is helpful but not required. In this tutorial, you will learn:
+Before continuing, make sure you have a Cloudflare account and have installed and authenticated Wrangler. Some experience with HTML, CSS, and JavaScript/TypeScript is helpful but not required. In this tutorial, you will learn:
 
 - How to create a Next.js application and run it on Cloudflare Workers
 - How to bind a Cloudflare D1 database to your Next.js app and use it to store authentication data
@@ -212,7 +212,7 @@ export { auth as middleware } from "./app/auth";
 
 ## 5. Create Database Tables
 
-The D1 adapter requires that tables be created within your database. It recommends using using the exported up() method to complete this. Within `src/app/api/` create a directory called `setup` containing a file called `route.ts`. Within this route handler, add the following code:
+The D1 adapter requires that tables be created within your database. It [recommends](https://authjs.dev/getting-started/adapters/d1#migrations) using the exported `up()` method to complete this. Within `src/app/api/` create a directory called `setup` containing a file called `route.ts`. Within this route handler, add the following code:
 
 <TypeScriptExample filename="src/app/api/setup/route.ts">
 ```ts
