@@ -37,7 +37,7 @@ You can find the finished code for this project on [GitHub](https://github.com/m
 
 <Render file="prereqs" product="workers" />
 
-- Create a [Resend account](https://resend.com/signup).
+- Create a [Resend account](https://resend.com/signup) with a [verified domain](https://resend.com/docs/dashboard/domains/introduction) and get an [API key](https://resend.com/docs/api-reference/api-keys/create-api-key).
 - [Install and authenticate Wrangler](/workers/wrangler/install-and-update/).
 
 ## 1. Create a Next.js app using Workers
@@ -138,9 +138,7 @@ interface CloudflareEnv {
 
 ## 4. Configure Credentials Provider
 
-Auth.js provides integrations for many different credential providers such as Google, GitHub, etc. For this tutorial we're going to use Resend magic links.
-
-Before continuing, either choose an alternative credential provider or ensure you have a domain and API key from Resend.
+Auth.js provides integrations for many different [credential providers](https://authjs.dev/getting-started/authentication) such as Google, GitHub, etc. For this tutorial we're going to use [Resend for magic links](https://authjs.dev/getting-started/authentication/email). You should have already created a Resend account and have an API key.
 
 With a domain [created and verified](https://resend.com/docs/dashboard/domains/introduction) within Resend, add a new Secret to your Worker containing an email from a verified domain such as `noreply@auth-js-d1-example.example.com`.
 
