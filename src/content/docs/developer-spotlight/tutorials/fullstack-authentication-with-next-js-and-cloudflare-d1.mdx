@@ -61,12 +61,6 @@ From within the repository or directory where you want to create your project ru
 
 This will create a new Next.js project using [OpenNext](https://opennext.js.org/cloudflare) that will run in a Worker using [Workers Assets](/workers/frameworks/framework-guides/nextjs/).
 
-Now, modify the newly created `package.json` slightly, adding `--ip localhost` to the preview command within the scripts like so:
-
-```json title="package.json"
-"preview": "cloudflare && wrangler dev --ip localhost",
-```
-
 Throughout this tutorial, we'll add several values to Cloudflare Secrets. For [local development](/workers/configuration/secrets/#local-development-with-secrets), add those same values to a file in the top level of your project called `.dev.vars` and make sure it is not committed into version control. This will let you work with Secret values locally. Go ahead and copy and paste the following into `.dev.vars` for now and replace the values as we go.
 
 ```sh title=".dev.vars"
