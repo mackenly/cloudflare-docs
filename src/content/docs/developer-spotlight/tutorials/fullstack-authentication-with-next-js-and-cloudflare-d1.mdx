@@ -255,6 +255,8 @@ Next, run the following to add a few components:
 npx shadcn@latest add button input card avatar label
 ```
 
+To make it easy, we've provided a basic sign-in interface for you below that you can copy into your app. You will likely want to customize this to fit your needs, but for now, this will let you sign in, see your account details, and update your user's name.
+
 Replace the contents of `page.ts` from within the `app/` directory with the following:
 
 ```ts title="src/app/page.ts"
@@ -367,9 +369,10 @@ export default async function Home() {
 
 Now, it's time to preview our app. Run the following to preview your application:
 
-```sh title="Preview your application"
-npm run preview
-```
+<PackageManagers
+	type="run"
+	args={"preview"}
+/>
 
 You should see our login form. But wait, we're not done yet. Remember to create your database tables by visiting `/api/setup`. You should see `Migration completed`. This means your database is ready to go.
 
@@ -377,9 +380,10 @@ Navigate back to your application's homepage. Enter your email and sign in. You 
 
 Now let's take our application to production. From within the project's directory run:
 
-```sh title="Deploy your application"
-npm run deploy
-```
+<PackageManagers
+	type="run"
+	args={"deploy"}
+/>
 
 This will build and deploy your application as a Worker. Note that you may need to select which account you want to deploy your Worker to. After your app is deployed, Wrangler should give you the URL on which it was deployed. It might look something like this: `https://auth-js-d1-example.example.workers.dev`. Add your URL to your Worker using:
 
