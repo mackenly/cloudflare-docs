@@ -35,7 +35,7 @@ To import a zone file using the dashboard:
 
 </TabItem> <TabItem label="API">
 
-To import records using the API, send a [POST request](/api/operations/dns-records-for-a-zone-import-dns-records) with a properly [formatted file](#format-your-zone-file).
+To import records using the API, send a [POST request](/api/resources/dns/subresources/records/methods/import/) with a properly [formatted file](#format-your-zone-file).
 
 </TabItem> </Tabs>
 
@@ -56,7 +56,7 @@ To export records using the dashboard:
 
 </TabItem> <TabItem label="API">
 
-To export records using the API, send a [GET request](/api/operations/dns-records-for-a-zone-export-dns-records).
+To export records using the API, send a [GET request](/api/resources/dns/subresources/records/methods/export/).
 
 </TabItem> </Tabs>
 
@@ -89,6 +89,10 @@ f.example.com.  60  IN  A   1.1.1.1 ; this is the comment cf_tags=tag1:value1,ta
 ; Neither attribute
 g.example.com.  60  IN  A   1.1.1.1
 ```
+
+### cf-flatten tag
+
+If you are on a paid zone and want to use [Per-record CNAME flattening](/dns/cname-flattening/set-up-cname-flattening/#per-record), use the tag `cf-flatten` next to each flattened CNAME record in your zone file. On export, this tag is automatically added to reflect the record configuration that you have on your zone.
 
 ## DNS zone file directives
 

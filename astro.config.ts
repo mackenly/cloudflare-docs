@@ -73,8 +73,8 @@ const autolinkConfig: rehypeAutolinkHeadingsOptions = {
 // https://astro.build/config
 export default defineConfig({
 	site: "https://developers.cloudflare.com",
-	smartypants: false,
 	markdown: {
+		smartypants: false,
 		rehypePlugins: [
 			[
 				rehypeMermaid,
@@ -158,6 +158,7 @@ export default defineConfig({
 				PageTitle: "./src/components/overrides/PageTitle.astro",
 				SocialIcons: "./src/components/overrides/SocialIcons.astro",
 				SkipLink: "./src/components/overrides/SkipLink.astro",
+				TableOfContents: "./src/components/overrides/TableOfContents.astro",
 			},
 			sidebar: await autogenSections(),
 			customCss: [
@@ -173,14 +174,15 @@ export default defineConfig({
 				"./src/tooltips.css",
 			],
 			pagination: false,
-			plugins: runLinkCheck
-				? [
+			plugins: [
+				...(runLinkCheck
+					? [
 						starlightLinksValidator({
 							errorOnInvalidHashes: false,
 							errorOnLocalLinks: false,
 							exclude: [
 								"/api/",
-								"/api/operations/**",
+								"/api/**",
 								"/changelog/",
 								"/http/resources/**",
 								"{props.*}",
@@ -195,21 +197,16 @@ export default defineConfig({
 								"/workers-ai/models/**",
 							],
 						}),
-						starlightDocSearch({
-							appId: "8MU1G3QO9P",
-							apiKey: "4edb0a6cef3338ff4bcfbc6b3d2db56b",
-							indexName: "TEST - Re-dev docs",
-						}),
-						starlightImageZoom(),
 					]
-				: [
-						starlightDocSearch({
-							appId: "8MU1G3QO9P",
-							apiKey: "4edb0a6cef3338ff4bcfbc6b3d2db56b",
-							indexName: "TEST - Re-dev docs",
-						}),
-						starlightImageZoom(),
-					],
+					: []),
+				starlightDocSearch({
+					appId: "D32WIYFTUF",
+					apiKey: "5cec275adc19dd3bc17617f7d9cf312a",
+					indexName: "prod_devdocs",
+					insights: true,
+				}),
+				starlightImageZoom(),
+			],
 		}),
 		tailwind({
 			applyBaseStyles: false,

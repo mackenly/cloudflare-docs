@@ -1,7 +1,6 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
 import { generateRedirectsEvaluator } from "redirects-in-workers";
 import redirectsFileContents from "../dist/_redirects";
-import functions from "./functions";
 
 const redirectsEvaluator = generateRedirectsEvaluator(redirectsFileContents);
 
@@ -23,6 +22,7 @@ export default class extends WorkerEntrypoint<Env> {
 			}
 
 			try {
+				// @ts-expect-error Ignore Fetcher type mismatch
 				const redirect = await redirectsEvaluator(request, this.env.ASSETS);
 				if (redirect) {
 					return redirect;
@@ -38,6 +38,7 @@ export default class extends WorkerEntrypoint<Env> {
 				);
 				const redirect = await redirectsEvaluator(
 					new Request(forceTrailingSlashURL, request),
+					// @ts-expect-error Ignore Fetcher type mismatch
 					this.env.ASSETS,
 				);
 				if (redirect) {
@@ -48,12 +49,6 @@ export default class extends WorkerEntrypoint<Env> {
 					"Could not evaluate redirects with a forced trailing slash",
 					error,
 				);
-			}
-
-			try {
-				return await functions.fetch(request, this.env, this.ctx);
-			} catch (error) {
-				console.error("Could not evaluate functions", error);
 			}
 		} catch (error) {
 			console.error("Unknown error", error);
