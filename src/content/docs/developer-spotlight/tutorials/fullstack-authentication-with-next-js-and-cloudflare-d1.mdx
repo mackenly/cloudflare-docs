@@ -1,5 +1,5 @@
 ---
-updated: 2024-11-10
+updated: 2025-01-13
 difficulty: Intermediate
 content_type: 📝 Tutorial
 pcx_content_type: tutorial
@@ -37,8 +37,8 @@ You can find the finished code for this project on [GitHub](https://github.com/m
 
 <Render file="prereqs" product="workers" />
 
-- Create a [Resend account](https://resend.com/signup) with a [verified domain](https://resend.com/docs/dashboard/domains/introduction) and get an [API key](https://resend.com/docs/api-reference/api-keys/create-api-key).
-- [Install and authenticate Wrangler](/workers/wrangler/install-and-update/).
+3. Create or login to a [Resend account](https://resend.com/signup) and get an [API key](https://resend.com/docs/dashboard/api-keys/introduction#add-api-key).
+4. [Install and authenticate Wrangler](/workers/wrangler/install-and-update/).
 
 ## 1. Create a Next.js app using Workers
 
@@ -59,19 +59,29 @@ From within the repository or directory where you want to create your project ru
 	}}
 />
 
-This will create a new Next.js project using [OpenNext](https://opennext.js.org/cloudflare) that will run in a Worker using [Workers Assets](/workers/frameworks/framework-guides/nextjs/).
+This will create a new Next.js project using [OpenNext](https://opennext.js.org/cloudflare) that will run in a Worker using [Workers Static Assets](/workers/frameworks/framework-guides/nextjs/#static-assets).
+
+Before we get started, open your project's `tsconfig.json` file and add the following to the `compilerOptions` object to allow for top level await needed to let our application get the Cloudflare context:
+
+```json title="tsconfig.json"
+{
+	"compilerOptions": {
+		"target": "ES2022",
+	}
+}
+```
 
 Throughout this tutorial, we'll add several values to Cloudflare Secrets. For [local development](/workers/configuration/secrets/#local-development-with-secrets), add those same values to a file in the top level of your project called `.dev.vars` and make sure it is not committed into version control. This will let you work with Secret values locally. Go ahead and copy and paste the following into `.dev.vars` for now and replace the values as we go.
 
 ```sh title=".dev.vars"
 AUTH_SECRET = "<replace-me>"
 AUTH_RESEND_KEY = "<replace-me>"
-AUTH_EMAIL_FROM = "<replace-me>"
+AUTH_EMAIL_FROM = "onboarding@resend.dev"
 AUTH_URL = "http://localhost:8787/"
 ```
 
 :::note[Manually set URL]
-Within the Workers environment, the `AUTH_URL` doesn't get picked up automatically by Auth.js, hence why we're specifying it manually here (we'll need to do the same for prod later).
+Within the Workers environment, the `AUTH_URL` doesn't always get picked up automatically by Auth.js, hence why we're specifying it manually here (we'll need to do the same for prod later).
 :::
 
 ## 2. Install Auth.js
@@ -86,10 +96,18 @@ Now run the following to generate an `AUTH_SECRET`:
 npx auth secret
 ```
 
-Now, deviating from the standard Auth.js setup, locate your generated secret (likely in a file named `.env.local`) and [add the secret to your Workers application](/workers/configuration/secrets/#adding-secrets-to-your-project) by running the following and completing the steps to add a secret's value:
+Now, deviating from the standard Auth.js setup, locate your generated secret (likely in a file named `.env.local`) and [add the secret to your Workers application](/workers/configuration/secrets/#adding-secrets-to-your-project) by running the following and completing the steps to add a secret's value that we just generated:
 
 ```sh
 npx wrangler secret put AUTH_SECRET
+```
+
+After adding the secret, update your `.dev.vars` file to include an `AUTH_SECRET` value (this secret should be different from the one you generated earlier for security purposes):
+
+```sh title=".dev.vars"
+# ...
+AUTH_SECRET = "<replace-me>"
+# ...
 ```
 
 Next, go into the newly generated `env.d.ts` file and add the following to the <Type text="CloudflareEnv" /> interface:
@@ -132,12 +150,20 @@ interface CloudflareEnv {
 
 ## 4. Configure Credentials Provider
 
-Auth.js provides integrations for many different [credential providers](https://authjs.dev/getting-started/authentication) such as Google, GitHub, etc. For this tutorial we're going to use [Resend for magic links](https://authjs.dev/getting-started/authentication/email). You should have already created a Resend account and have an API key.
+Auth.js provides integrations for many different [credential providers](https://authjs.dev/getting-started/authentication) such as Google, GitHub, etc. For this tutorial we're going to use [Resend for magic links](https://authjs.dev/getting-started/authentication/email). You should have already created a Resend account and have an [API key](https://resend.com/docs/dashboard/api-keys/introduction#add-api-key).
 
-With a domain [created and verified](https://resend.com/docs/dashboard/domains/introduction) within Resend, add a new Secret to your Worker containing an email from a verified domain such as `noreply@auth-js-d1-example.example.com`.
+Using either a [Resend verified domain email address](https://resend.com/docs/dashboard/domains/introduction) or `onboarding@resend.dev`, add a new Secret to your Worker containing the email your magic links will come from:
 
 ```sh title="Add Resend email to secrets"
 npx wrangler secret put AUTH_EMAIL_FROM
+```
+
+Next, ensure the `AUTH_EMAIL_FROM` environment variable is updated in your `.dev.vars` file with the email you just added as a secret:
+
+```sh title=".dev.vars"
+# ...
+AUTH_EMAIL_FROM = "onboarding@resend.dev"
+# ...
 ```
 
 Now [create a Resend API key](https://resend.com/docs/dashboard/api-keys/introduction) with `Sending access` and add it to your Worker's Secrets:
@@ -146,7 +172,15 @@ Now [create a Resend API key](https://resend.com/docs/dashboard/api-keys/introdu
 npx wrangler secret put AUTH_RESEND_KEY
 ```
 
-After adding both of those Secrets, your `env.d.ts` should include the following:
+As with previous secrets, update your `.dev.vars` file with the new secret value for `AUTH_RESEND_KEY` to use in local development:
+
+```sh title=".dev.vars"
+# ...
+AUTH_RESEND_KEY = "<replace-me>"
+# ...
+```
+
+After adding both of those Secrets, your `env.d.ts` should now include the following:
 
 ```ts title="env.d.ts"
 interface CloudflareEnv {
@@ -185,7 +219,7 @@ export const { handlers, signIn, signOut, auth } = await authResult();
 
 Now, lets add the route handler and middleware used to authenticate and persist sessions.
 
-Create a new directory structure and route handler within `src/app/api/auth/[...nextauth]` as `route.ts`. The file should contain:
+Create a new directory structure and route handler within `src/app/api/auth/[...nextauth]` called `route.ts`. The file should contain:
 
 <TypeScriptExample filename="src/app/api/auth/[...nextauth]/route.ts">
 ```ts
@@ -228,7 +262,7 @@ export async function GET(request: NextRequest) {
 You'll need to run this once on your production database to create the necessary tables. If you're following along with this tutorial, we'll run it together in a few steps.
 
 :::note[Clean up]
-Running this multiple times won't hurt anything since the tables are only created if they do not already exist, but it's a good idea to remove this route from your production code once you've run it.
+Running this multiple times won't hurt anything since the tables are only created if they do not already exist, but it's a good idea to remove this route from your production code once you've run it since you won't need it anymore.
 :::
 
 Before we go further, make sure you've created all of the necessary files:
@@ -249,8 +283,10 @@ Before we go further, make sure you've created all of the necessary files:
 </FileTree>
 
 ## 6. Build Sign-in Interface
-We've completed the backend steps for our application. Now, we need a way to sign in. First, let's install shadcn:
-<PackageManagers pkg="shadcn@latest" args={"init -d"} />
+We've completed the backend steps for our application. Now, we need a way to sign in. First, let's install [shadcn](https://ui.shadcn.com/):
+```sh title="Install shadcn"
+npx shadcn@latest init -d
+```
 
 Next, run the following to add a few components:
 ```sh title="Add components"
@@ -377,11 +413,15 @@ Now, it's time to preview our app. Run the following to preview your application
 	args={"preview"}
 />
 
+:::caution[Windows support]
+OpenNext has [limited Windows support](https://opennext.js.org/cloudflare#windows-support) and recommends using WSL2 if developing on Windows.
+:::
+
 You should see our login form. But wait, we're not done yet. Remember to create your database tables by visiting `/api/setup`. You should see `Migration completed`. This means your database is ready to go.
 
-Navigate back to your application's homepage. Enter your email and sign in. You should receive an email in your inbox (check spam). Follow the link to sign in. If everything is configured correctly, you should now see a basic user profile letting your update your name and sign out.
+Navigate back to your application's homepage. Enter your email and sign in (use the same email as your Resend account if you used the `onboarding@resend.dev` address). You should receive an email in your inbox (check spam). Follow the link to sign in. If everything is configured correctly, you should now see a basic user profile letting your update your name and sign out.
 
-Now let's take our application to production. From within the project's directory run:
+Now let's deploy our application to production. From within the project's directory run:
 
 <PackageManagers
 	type="run"
